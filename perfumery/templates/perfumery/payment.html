@@ -60,7 +60,10 @@
                 <div class="summary-line"><span>Delivery fee</span><strong>&#8358;{{ checkout.delivery_fee|intcomma }}</strong></div>
                 <div class="summary-line"><span>Estimated delivery</span><strong>{{ checkout.estimated_days }}</strong></div>
                 <div class="summary-line summary-total"><span>Grand total</span><strong>&#8358;{{ checkout.grand_total|intcomma }}</strong></div>
-                <button class="btn btn-signup checkout-submit payment-placeholder" type="button" disabled aria-disabled="true">Pay with Paystack</button>
+                <form method="post" action="{% url 'perfumery:payment_initialize' %}">
+                    {% csrf_token %}
+                    <button class="btn btn-signup checkout-submit payment-placeholder" type="submit">Pay &#8358;{{ checkout.grand_total|intcomma }} with Paystack</button>
+                </form>
                 <p class="summary-note payment-coming-soon">This is a payment preview. You will not be charged here.</p>
             </div>
         </aside>

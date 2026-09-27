@@ -4,9 +4,10 @@ from decimal import Decimal
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.views.decorators.http import require_POST
 from allauth.socialaccount.models import SocialAccount
 
 from .forms import CheckoutForm, CustomerAddressForm, ProfilePictureForm
@@ -304,6 +305,12 @@ def payment(request):
         'checkout': checkout_data,
         'lga': lga,
     })
+
+
+@login_required
+@require_POST
+def payment_initialize(request):
+    return HttpResponse("Payment initialization coming next.")
 
 
 def add_to_cart(request, product_id):

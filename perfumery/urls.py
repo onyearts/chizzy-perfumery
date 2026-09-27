@@ -13,6 +13,7 @@ urlpatterns = [
     path('local-governments/', views.local_governments, name='local_governments'),
     path('delivery-fee/', views.delivery_fee, name='delivery_fee'),
     path('payment/', views.payment, name='payment'),
+    path('payment/initialize/', views.payment_initialize, name='payment_initialize'),
     path('account/', views.account_dashboard, name='account_dashboard'),
     path('account/delivery-address/', views.account_delivery_address, name='account_delivery_address'),
     path('account/settings/', views.account_settings, name='account_settings'),

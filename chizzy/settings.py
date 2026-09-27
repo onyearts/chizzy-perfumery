@@ -74,6 +74,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'perfumery.views.cart_context',
                 'perfumery.views.social_auth_context',
+                'perfumery.context_processors.payment_context',
             ],
         },
     },
@@ -161,6 +162,10 @@ DEFAULT_FROM_EMAIL = os.environ.get(
     'DEFAULT_FROM_EMAIL',
     EMAIL_HOST_USER or 'Chizzy Perfumery <noreply@localhost>',
 ).strip()
+
+PAYSTACK_PUBLIC_KEY = os.environ.get('PAYSTACK_PUBLIC_KEY', '').strip()
+PAYSTACK_SECRET_KEY = os.environ.get('PAYSTACK_SECRET_KEY', '').strip()
+PAYSTACK_WEBHOOK_SECRET = os.environ.get('PAYSTACK_WEBHOOK_SECRET', '').strip()
 
 smtp_is_configured = all((EMAIL_HOST, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD))
 EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', '').strip() or (
