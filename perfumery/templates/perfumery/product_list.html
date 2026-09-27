@@ -1,0 +1,141 @@
+{% extends 'perfumery/base.html' %}
+{% load humanize %}
+{% block title %}Fragrance edit | Chizzy Perfumery{% endblock %}
+{% block content %}
+<section class="intro">
+    <div class="container-xl hero-inner">
+        <div class="row align-items-center g-4">
+            <div class="col-lg-6">
+                <div class="hero-copy">
+                    <p class="eyebrow">A considered fragrance house</p>
+                    <h1>Find your<br><em>signature scent.</em></h1>
+                    <p class="intro-copy">A thoughtful collection of fragrances, chosen to stay with you long after the first impression.</p>
+                    <div class="hero-actions">
+                        <a class="hero-cta" href="#collection">Explore the collection <i class="bi bi-arrow-down-right" aria-hidden="true"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-visual" aria-label="A sculptural perfume bottle">
+                    <div class="hero-image">
+                        <img src="https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&amp;fit=crop&amp;w=1200&amp;q=85" alt="Perfume bottle in warm studio light" fetchpriority="high">
+                    </div>
+                    <span class="hero-seal">Scent<br>with a story</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="catalog container-xl" id="collection" aria-labelledby="catalog-title">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow mb-2">The edit</p>
+            <h2 id="catalog-title">The collection</h2>
+        </div>
+        <span class="collection-count">{{ products|length }} {% if products|length == 1 %}fragrance{% else %}fragrances{% endif %}</span>
+    </div>
+    {% if products %}
+    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3 g-md-4">
+        {% for product in products %}
+        <div class="col" data-catalog-item>
+            {% include 'perfumery/partials/product_card.html' with product=product %}
+            </div>
+        {% endfor %}
+    </div>
+    <nav class="product-pagination" id="productPagination" aria-label="Product pages" hidden>
+        <button class="catalog-page-control" type="button" data-page-previous>Previous</button>
+        <div class="catalog-page-numbers" data-page-numbers></div>
+        <span class="catalog-page-status" data-page-status aria-live="polite"></span>
+        <button class="catalog-page-control" type="button" data-page-next>Next</button>
+    </nav>
+    {% else %}
+    <div class="empty-state">
+        <span class="bottle-mark" aria-hidden="true">P.</span>
+        <h3>Your collection starts here.</h3>
+        <p>Add your first fragrance from Seller admin to see it in the shop.</p>
+    </div>
+    {% endif %}
+</section>
+<script>
+(() => {
+    const grid = document.querySelector('#collection .row');
+    const pagination = document.getElementById('productPagination');
+    if (!grid || !pagination) return;
+
+    const products = Array.from(grid.querySelectorAll('[data-catalog-item]'));
+    const pageNumbers = pagination.querySelector('[data-page-numbers]');
+    const pageStatus = pagination.querySelector('[data-page-status]');
+    const previousButton = pagination.querySelector('[data-page-previous]');
+    const nextButton = pagination.querySelector('[data-page-next]');
+    let pageSize = getPageSize();
+    let currentPage = 1;
+
+    function getPageSize() {
+        if (window.matchMedia('(max-width: 575.98px)').matches) return 8;
+        if (window.matchMedia('(max-width: 991.98px)').matches) return 12;
+        return 16;
+    }
+
+    function renderPageNumbers(pageCount) {
+        if (pageNumbers.children.length !== pageCount) {
+            pageNumbers.replaceChildren();
+            for (let page = 1; page <= pageCount; page += 1) {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'catalog-page-number';
+                button.dataset.page = String(page);
+                button.setAttribute('aria-label', `Page ${page}`);
+                pageNumbers.append(button);
+            }
+        }
+
+        for (const button of pageNumbers.children) {
+            const isCurrent = Number(button.dataset.page) === currentPage;
+            button.textContent = button.dataset.page;
+            button.classList.toggle('is-current', isCurrent);
+            if (isCurrent) button.setAttribute('aria-current', 'page');
+            else button.removeAttribute('aria-current');
+        }
+    }
+
+    function render() {
+        const pageCount = Math.ceil(products.length / pageSize);
+        currentPage = Math.min(currentPage, pageCount);
+        const firstIndex = (currentPage - 1) * pageSize;
+        const lastIndex = Math.min(firstIndex + pageSize, products.length);
+
+        products.forEach((product, index) => {
+            product.hidden = index < firstIndex || index >= lastIndex;
+        });
+
+        pagination.hidden = pageCount <= 1;
+        previousButton.disabled = currentPage <= 1;
+        nextButton.disabled = currentPage >= pageCount;
+        pageStatus.textContent = `Showing ${firstIndex + 1}–${lastIndex} of ${products.length}`;
+        renderPageNumbers(pageCount);
+    }
+
+    previousButton.addEventListener('click', () => {
+        if (currentPage > 1) { currentPage -= 1; render(); }
+    });
+    nextButton.addEventListener('click', () => {
+        if (currentPage < Math.ceil(products.length / pageSize)) { currentPage += 1; render(); }
+    });
+    pageNumbers.addEventListener('click', (event) => {
+        const button = event.target.closest('[data-page]');
+        if (button) { currentPage = Number(button.dataset.page); render(); }
+    });
+
+    window.addEventListener('resize', () => {
+        const nextPageSize = getPageSize();
+        if (nextPageSize === pageSize) return;
+        const firstVisibleIndex = (currentPage - 1) * pageSize;
+        pageSize = nextPageSize;
+        currentPage = Math.floor(firstVisibleIndex / pageSize) + 1;
+        render();
+    });
+
+    render();
+})();
+</script>
+{% endblock %}

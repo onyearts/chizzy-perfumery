@@ -1,0 +1,69 @@
+{% extends 'perfumery/base.html' %}
+{% load humanize %}
+{% block title %}Secure Payment | Chizzy Perfumery{% endblock %}
+{% block content %}
+<section class="checkout-page payment-page container-xl">
+    <p class="eyebrow">PAYMENT DETAILS</p>
+    <div class="section-heading checkout-heading">
+        <h1>Secure Payment</h1>
+        <span class="collection-count">Review your order</span>
+    </div>
+
+    <div class="row g-5 align-items-start">
+        <div class="col-lg-7">
+            <section class="checkout-form payment-address-card" aria-labelledby="shipping-heading">
+                <h2 class="h5 mb-3" id="shipping-heading">Shipping address</h2>
+                <div class="payment-address-grid">
+                    <div>
+                        <span class="payment-detail-label">Full name</span>
+                        <strong class="payment-detail-value">{{ checkout.full_name }}</strong>
+                    </div>
+                    <div>
+                        <span class="payment-detail-label">Phone number</span>
+                        <strong class="payment-detail-value">{{ checkout.phone_number }}</strong>
+                    </div>
+                    <div class="payment-address-wide">
+                        <span class="payment-detail-label">Email address</span>
+                        <strong class="payment-detail-value">{{ checkout.email }}</strong>
+                    </div>
+                    <div class="payment-address-wide">
+                        <span class="payment-detail-label">Delivery address</span>
+                        <strong class="payment-detail-value">{{ checkout.delivery_address }}</strong>
+                    </div>
+                    <div class="payment-address-wide">
+                        <span class="payment-detail-label">City / Area</span>
+                        <strong class="payment-detail-value">{{ checkout.city_area }}{% if lga %}, {{ lga.name }}, {{ lga.state.name }}{% endif %}</strong>
+                    </div>
+                </div>
+                <p class="payment-estimate"><span>Estimated delivery</span><strong>{{ checkout.estimated_days }}</strong></p>
+                {% if checkout.order_note %}
+                <div class="payment-order-note">
+                    <span class="payment-detail-label">Order note</span>
+                    <p>{{ checkout.order_note }}</p>
+                </div>
+                {% endif %}
+            </section>
+        </div>
+
+        <aside class="col-lg-5">
+            <div class="cart-summary checkout-summary payment-summary-card">
+                <h2>Order summary</h2>
+                <div class="checkout-items">
+                    {% for item in checkout.items %}
+                    <div class="checkout-item">
+                        <div><strong>{{ item.name }}</strong><span>{{ item.quantity }} &times; &#8358;{{ item.unit_price|intcomma }}</span></div>
+                        <strong>&#8358;{{ item.line_total|intcomma }}</strong>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="summary-line"><span>Subtotal</span><strong>&#8358;{{ checkout.subtotal|intcomma }}</strong></div>
+                <div class="summary-line"><span>Delivery fee</span><strong>&#8358;{{ checkout.delivery_fee|intcomma }}</strong></div>
+                <div class="summary-line"><span>Estimated delivery</span><strong>{{ checkout.estimated_days }}</strong></div>
+                <div class="summary-line summary-total"><span>Grand total</span><strong>&#8358;{{ checkout.grand_total|intcomma }}</strong></div>
+                <button class="btn btn-signup checkout-submit payment-placeholder" type="button" disabled aria-disabled="true">Pay with Paystack</button>
+                <p class="summary-note payment-coming-soon">This is a payment preview. You will not be charged here.</p>
+            </div>
+        </aside>
+    </div>
+</section>
+{% endblock %}

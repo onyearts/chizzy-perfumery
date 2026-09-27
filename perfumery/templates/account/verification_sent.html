@@ -1,0 +1,8 @@
+{% extends 'account/base_entrance.html' %}
+{% block title %}Verify your email | Chizzy Perfumery{% endblock %}
+{% block entrance_content %}
+<p class="eyebrow">CHECK YOUR INBOX</p>
+<h2 class="auth-title">Verify your email</h2>
+<p class="auth-description">We sent a confirmation link to the email address you registered. Open it to verify your account and finish signing in. Check your spam folder if it does not arrive shortly.</p>
+<a class="auth-text-link" href="{% url 'account_login' %}">Return to log in</a>
+{% endblock %}

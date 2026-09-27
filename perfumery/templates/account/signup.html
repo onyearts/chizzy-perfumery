@@ -1,0 +1,102 @@
+{% extends 'account/base_entrance.html' %}
+{% load i18n allauth account socialaccount %}
+{% block title %}Create account | Chizzy Perfumery{% endblock %}
+{% block entrance_content %}
+<p class="eyebrow">A MORE PERSONAL EDIT</p>
+<h2 class="auth-title">Create your account</h2>
+<p class="auth-description">Save your favourites and keep your fragrance finds together.</p>
+{% if form.non_field_errors %}<div class="auth-errors" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+<form class="auth-form" method="post" action="{% url 'account_signup' %}">
+    {% csrf_token %}
+    {{ redirect_field }}
+    {{ form.as_p }}
+    <button class="btn btn-signup w-100 auth-submit" type="submit">Create account <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i></button>
+</form>
+<div class="auth-divider"><span>or sign up with</span></div>
+<div class="social-auth-buttons">
+    {% if social_auth.google %}<a class="social-auth-button" href="{% provider_login_url 'google' process='login' %}"><i class="bi bi-google" aria-hidden="true"></i> Google</a>
+    {% else %}<button class="social-auth-button is-disabled" type="button" disabled title="Google OAuth credentials are not configured"><i class="bi bi-google" aria-hidden="true"></i> Google</button>{% endif %}
+    {% if social_auth.facebook %}<a class="social-auth-button" href="{% provider_login_url 'facebook' process='login' %}"><i class="bi bi-facebook" aria-hidden="true"></i> Facebook</a>
+    {% else %}<button class="social-auth-button is-disabled" type="button" disabled title="Facebook OAuth credentials are not configured"><i class="bi bi-facebook" aria-hidden="true"></i> Facebook</button>{% endif %}
+</div>
+{% if not social_auth.google or not social_auth.facebook %}<p class="social-auth-setup-note">Social sign-in buttons become active after Google or Facebook app credentials are added to your local environment.</p>{% endif %}
+<p class="auth-switch">Already have an account? <a href="{% url 'account_login' %}">Log in</a></p>
+<script>
+    (() => {
+        const passwordInput = document.getElementById('id_password1');
+        const confirmationInput = document.getElementById('id_password2');
+        const usernameInput = document.getElementById('id_username');
+        const emailInput = document.getElementById('id_email');
+        const helpText = document.getElementById(passwordInput?.getAttribute('aria-describedby'));
+        const rules = helpText?.parentElement.nextElementSibling;
+
+        if (!passwordInput || !confirmationInput || !rules?.matches('ul')) return;
+
+        const ruleChecks = [
+            (password) => !isSimilarToAccountDetails(password),
+            (password) => password.length >= 8,
+            (password) => !isCommonPassword(password),
+            (password) => password.length > 0 && !/^\d+$/.test(password),
+        ];
+        const commonPasswords = new Set([
+            'password', 'password1', 'password12', 'password123', 'password1234', 'passw0rd', '12345678',
+            '123456789', '1234567890', 'qwerty', 'qwerty123', 'qwertyuiop',
+            'letmein', 'welcome', 'welcome1', 'iloveyou', 'admin123', 'changeme',
+            'sunshine', 'princess', 'football', 'monkey', 'dragon', 'master123',
+            'login123', 'abc12345', 'trustno1', '1q2w3e4r', 'zaq12wsx',
+        ]);
+
+        function isCommonPassword(password) {
+            return commonPasswords.has(password.toLowerCase());
+        }
+
+        function isSimilarToAccountDetails(password) {
+            const normalizedPassword = password.toLowerCase();
+            const email = emailInput.value.toLowerCase();
+            const details = [usernameInput.value, email, email.split('@')[0]]
+                .flatMap((detail) => detail.toLowerCase().split(/[^a-z0-9]+/))
+                .filter((detail) => detail.length >= 3);
+
+            return details.some((detail) => normalizedPassword.includes(detail));
+        }
+
+        const ruleItems = [...rules.querySelectorAll('li')];
+        ruleItems.forEach((item, index) => {
+            item.classList.add('password-rule');
+            item.dataset.state = 'pending';
+            item.dataset.ruleIndex = String(index);
+        });
+        rules.classList.add('password-rules');
+        rules.setAttribute('aria-label', 'Password requirements');
+
+        const confirmationFeedback = document.createElement('p');
+        confirmationFeedback.className = 'password-match-feedback';
+        confirmationFeedback.id = 'passwordMatchFeedback';
+        confirmationFeedback.setAttribute('aria-live', 'polite');
+        confirmationInput.setAttribute('aria-describedby', 'passwordMatchFeedback');
+        confirmationInput.parentElement.append(confirmationFeedback);
+
+        function updatePasswordFeedback() {
+            const password = passwordInput.value;
+            ruleItems.forEach((item, index) => {
+                const satisfied = password.length > 0 && ruleChecks[index](password);
+                item.dataset.state = password.length === 0 ? 'pending' : satisfied ? 'met' : 'unmet';
+            });
+
+            const confirmation = confirmationInput.value;
+            confirmationFeedback.hidden = confirmation.length === 0;
+            confirmationFeedback.textContent = confirmation.length === 0
+                ? ''
+                : confirmation === password ? 'Passwords match.' : 'Passwords do not match.';
+            confirmationFeedback.classList.toggle('is-match', confirmation.length > 0 && confirmation === password);
+            confirmationFeedback.classList.toggle('is-mismatch', confirmation.length > 0 && confirmation !== password);
+        }
+
+        passwordInput.addEventListener('input', updatePasswordFeedback);
+        usernameInput.addEventListener('input', updatePasswordFeedback);
+        emailInput.addEventListener('input', updatePasswordFeedback);
+        confirmationInput.addEventListener('input', updatePasswordFeedback);
+        updatePasswordFeedback();
+    })();
+</script>
+{% endblock %}

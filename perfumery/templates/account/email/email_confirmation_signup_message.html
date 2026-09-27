@@ -1,0 +1,38 @@
+{% load account %}
+{% user_display user as user_display %}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Confirm your Chizzy Perfumery email</title>
+</head>
+<body style="margin:0;padding:32px 16px;background:#f7f5f0;color:#222720;font-family:Arial,Helvetica,sans-serif;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:600px;margin:0 auto;background:#fffefa;border:1px solid #e4e0d7;">
+        <tr>
+            <td style="padding:26px 32px;border-bottom:1px solid #e4e0d7;">
+                <p style="margin:0;font-size:18px;font-weight:700;letter-spacing:.2px;color:#222720;">Chizzy Perfumery<span style="color:#b94d35;">.</span></p>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding:36px 32px 24px;">
+                <p style="margin:0 0 12px;color:#b94d35;font-size:11px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;">One last step</p>
+                <h1 style="margin:0 0 18px;font-family:Georgia,'Times New Roman',serif;font-size:30px;font-weight:500;line-height:1.2;color:#222720;">Confirm your email</h1>
+                <p style="margin:0 0 16px;font-size:15px;line-height:1.7;">Hi {{ user_display }},</p>
+                <p style="margin:0 0 24px;color:#555b52;font-size:14px;line-height:1.7;">Thanks for creating an account with Chizzy Perfumery. Verify your email address to activate your account and continue discovering your next signature scent.</p>
+                {% if code %}
+                <p style="margin:0 0 12px;color:#555b52;font-size:14px;line-height:1.6;">Enter this verification code in the open signup page:</p>
+                <p style="display:inline-block;margin:0 0 24px;padding:12px 18px;border:1px solid #e4e0d7;background:#f7f5f0;font-size:22px;font-weight:700;letter-spacing:3px;">{{ code }}</p>
+                {% else %}
+                <p style="margin:0 0 24px;"><a href="{{ activate_url }}" style="display:inline-block;padding:14px 22px;background:#222720;color:#fffefa;text-decoration:none;font-size:14px;font-weight:700;">Verify email address</a></p>
+                <p style="margin:0 0 24px;color:#74786f;font-size:12px;line-height:1.6;">If the button does not work, copy this link into your browser:<br><a href="{{ activate_url }}" style="color:#9f3d29;word-break:break-all;">{{ activate_url }}</a></p>
+                {% endif %}
+                <p style="margin:0;color:#74786f;font-size:12px;line-height:1.6;">If you did not create a Chizzy Perfumery account, you can safely ignore this email.</p>
+            </td>
+        </tr>
+        <tr>
+            <td style="padding:18px 32px;border-top:1px solid #e4e0d7;color:#74786f;font-size:11px;line-height:1.6;">Kind regards,<br>The Chizzy Perfumery Team</td>
+        </tr>
+    </table>
+</body>
+</html>

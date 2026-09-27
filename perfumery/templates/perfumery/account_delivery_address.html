@@ -1,0 +1,61 @@
+{% extends 'perfumery/base.html' %}
+{% block title %}Delivery Address | Chizzy Perfumery{% endblock %}
+{% block content %}
+<section class="checkout-page container-xl" data-lgas-url="{% url 'perfumery:local_governments' %}">
+    <p class="eyebrow">MY ACCOUNT</p>
+    <div class="section-heading checkout-heading">
+        <h1>Delivery Address</h1>
+        <a class="collection-count profile-back-link" href="{% url 'perfumery:account_dashboard' %}">Back to My Account</a>
+    </div>
+
+    <div class="row g-5 align-items-start">
+        <div class="col-lg-8 col-xl-7">
+            <form method="post" class="checkout-form">
+                {% csrf_token %}
+                <div class="checkout-fields">
+                    {% for field in form %}
+                    <div class="checkout-field{% if field.name == 'delivery_address' %} checkout-field-wide{% endif %}">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% for error in field.errors %}<small class="checkout-error">{{ error }}</small>{% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% if form.non_field_errors %}<div class="checkout-error">{{ form.non_field_errors }}</div>{% endif %}
+                <button class="btn btn-signup checkout-submit" type="submit">Save Delivery Address</button>
+            </form>
+        </div>
+    </div>
+</section>
+<script>
+(() => {
+    const page = document.querySelector('[data-lgas-url]');
+    const state = document.getElementById('id_state');
+    const lga = document.getElementById('id_local_government');
+    if (!page || !state || !lga) return;
+
+    state.addEventListener('change', async () => {
+        const previousLga = lga.value;
+        lga.disabled = true;
+        lga.replaceChildren(new Option('Choose a local government', ''));
+        if (!state.value) return;
+
+        try {
+            const endpoint = new URL(page.dataset.lgasUrl, window.location.origin);
+            endpoint.searchParams.set('state_id', state.value);
+            const response = await fetch(endpoint, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            if (!response.ok) throw new Error('Local governments unavailable');
+            const data = await response.json();
+            for (const item of data.lgas) lga.add(new Option(item.name, item.id));
+            if (data.lgas.some(item => String(item.id) === previousLga)) lga.value = previousLga;
+            lga.disabled = data.lgas.length === 0;
+            if (data.lgas.length === 0) lga.replaceChildren(new Option('No delivery areas available', ''));
+        } catch {
+            lga.replaceChildren(new Option('Could not load local governments', ''));
+        }
+    });
+
+    if (state.value) state.dispatchEvent(new Event('change'));
+})();
+</script>
+{% endblock %}

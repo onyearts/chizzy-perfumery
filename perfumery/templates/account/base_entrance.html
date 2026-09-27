@@ -1,0 +1,16 @@
+{% extends 'perfumery/base.html' %}
+{% block content %}
+<section class="auth-page container-xl">
+    <div class="auth-shell">
+        <div class="auth-aside">
+            <p class="eyebrow">CHIZZY PERFUMERY</p>
+            <h1>Make room for<br><em>your next favourite.</em></h1>
+            <p>Keep your fragrance discoveries close and your next signature scent within reach.</p>
+            <span class="auth-aside-mark" aria-hidden="true">C.</span>
+        </div>
+        <div class="auth-panel">
+            {% block entrance_content %}{% endblock %}
+        </div>
+    </div>
+</section>
+{% endblock %}

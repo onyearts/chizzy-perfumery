@@ -1,0 +1,31 @@
+{% extends 'perfumery/base.html' %}
+{% load humanize %}
+{% block title %}Search | Chizzy Perfumery{% endblock %}
+{% block content %}
+<section class="search-page container-xl">
+    <p class="eyebrow">FIND YOUR NEXT SCENT</p>
+    <h1 class="search-title">Search the collection</h1>
+    {% if query %}
+        {% if products %}
+        <div class="section-heading search-heading">
+            <h2>Results for “{{ query }}”</h2>
+            <span class="collection-count">{{ products|length }} found</span>
+        </div>
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3 g-md-4">
+            {% for product in products %}<div class="col">{% include 'perfumery/partials/product_card.html' with product=product %}</div>{% endfor %}
+        </div>
+        {% endif %}
+        {% if suggestions %}
+        <div class="section-heading search-heading {% if products %}mt-5{% endif %}">
+            <div><p class="eyebrow mb-2">Worth a look</p><h2>{% if products %}You might also like{% else %}No exact match. Try these instead{% endif %}</h2></div>
+        </div>
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3 g-md-4">
+            {% for product in suggestions %}<div class="col">{% include 'perfumery/partials/product_card.html' with product=product %}</div>{% endfor %}
+        </div>
+        {% endif %}
+        {% if not products and not suggestions %}<p class="search-empty">The collection is being refreshed. Please try another search shortly.</p>{% endif %}
+    {% else %}
+        <p class="search-empty">Search by fragrance, brand, or scent notes.</p>
+    {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends 'perfumery/base.html' %}
+{% load humanize %}
+{% block title %}{{ product.name }} | Chizzy Perfumery{% endblock %}
+{% block content %}
+<div class="detail-wrap container-xl">
+    <a class="back-link" href="{% url 'perfumery:product_list' %}"><i class="bi bi-arrow-left" aria-hidden="true"></i> Back to collection</a>
+    <section class="detail-layout row g-4 g-lg-5 align-items-center">
+        <div class="col-lg-6">
+            <div class="detail-image">
+                {% if product.image %}<img src="{{ product.image.url }}" alt="{{ product.name }}">
+                {% else %}<span class="product-fallback" aria-hidden="true">P.</span>{% endif %}
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="detail-copy">
+                <p class="eyebrow">{{ product.brand|default:'THE PERFUMERY COLLECTION' }}</p>
+                <h1>{{ product.name }}</h1>
+                {% if product.category %}<p class="category-label">{{ product.category.name }}</p>{% endif %}
+                <p class="product-volume">{{ product.volume_ml }}ml Eau de Parfum</p>
+                <p class="detail-price">₦{{ product.price|intcomma }}</p>
+                {% if product.description %}<p class="description">{{ product.description|linebreaksbr }}</p>{% endif %}
+                {% if product.stock == 0 %}
+                <p class="stock-note stock-note--out" role="status"><i class="bi bi-circle-fill" aria-hidden="true"></i><span>Out of Stock</span></p>
+                {% elif product.stock <= 10 %}
+                <p class="stock-note stock-note--limited" role="status"><i class="bi bi-circle-fill" aria-hidden="true"></i><span>Limited Availability &mdash; Only {{ product.stock }} left</span></p>
+                {% else %}
+                <p class="stock-note stock-note--available" role="status"><i class="bi bi-circle-fill" aria-hidden="true"></i><span>In Stock</span></p>
+                {% endif %}
+                <form class="product-purchase-form" action="{% url 'perfumery:add_to_cart' product.id %}" method="post">
+                    {% csrf_token %}
+                    <label class="visually-hidden" for="detailQuantity">Quantity</label>
+                    <input class="form-control purchase-quantity" id="detailQuantity" name="quantity" type="number" min="1" max="{{ product.stock }}" value="1" {% if not product.stock %}disabled{% endif %}>
+                    <button class="btn btn-signup auth-submit" type="submit" {% if not product.stock %}disabled{% endif %}>{% if product.stock %}<i class="bi bi-bag-plus me-2" aria-hidden="true"></i>Add to bag{% else %}Sold out{% endif %}</button>
+                </form>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

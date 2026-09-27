@@ -1,0 +1,59 @@
+{% extends 'perfumery/base.html' %}
+{% load humanize %}
+{% block title %}Your bag | Chizzy Perfumery{% endblock %}
+{% block content %}
+<section class="cart-page container-xl">
+    <p class="eyebrow">YOUR SELECTION</p>
+    <div class="section-heading cart-heading"><h1>Your bag</h1><span class="collection-count">{{ cart_quantity }} {% if cart_quantity == 1 %}item{% else %}items{% endif %}</span></div>
+    {% if items %}
+    <div class="row g-5 align-items-start">
+        <div class="col-lg-8">
+            <div class="cart-items">
+                {% for item in items %}
+                <article class="cart-item">
+                    <a class="cart-item-image" href="{{ item.product.get_absolute_url }}">
+                        {% if item.product.image %}<img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">
+                        {% else %}<span class="product-fallback" aria-hidden="true">P.</span>{% endif %}
+                    </a>
+                    <div class="cart-item-details">
+                        <p class="product-brand">{{ item.product.brand|default:'CHIZZY PERFUMERY' }}</p>
+                        <a class="cart-item-name" href="{{ item.product.get_absolute_url }}">{{ item.product.name }}</a>
+                        {% if item.product.category %}<p class="cart-item-category">{{ item.product.category.name }}</p>{% endif %}
+                        <form class="cart-quantity-form" action="{% url 'perfumery:update_cart_item' item.product.id %}" method="post">
+                            {% csrf_token %}
+                            <label class="visually-hidden" for="quantity-{{ item.product.id }}">Quantity for {{ item.product.name }}</label>
+                            <input class="form-control cart-quantity" id="quantity-{{ item.product.id }}" name="quantity" type="number" min="0" max="{{ item.product.stock }}" value="{{ item.quantity }}" aria-label="Quantity">
+                            <button class="btn cart-update" type="submit">Update</button>
+                        </form>
+                    </div>
+                    <div class="cart-item-end">
+                        <strong>₦{{ item.line_total|intcomma }}</strong>
+                        <form action="{% url 'perfumery:remove_cart_item' item.product.id %}" method="post">
+                            {% csrf_token %}
+                            <button class="btn remove-item" type="submit"><i class="bi bi-trash3" aria-hidden="true"></i><span>Remove</span></button>
+                        </form>
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+        </div>
+        <aside class="col-lg-4">
+            <div class="cart-summary">
+                <h2>Order summary</h2>
+                <div class="summary-line"><span>Subtotal</span><strong>₦{{ total|intcomma }}</strong></div>
+                <p class="summary-note">Delivery and payment will be arranged at checkout.</p>
+                <a class="btn btn-signup w-100" href="{% url 'perfumery:checkout' %}">Continue to checkout</a>
+                <a class="continue-shopping" href="{% url 'perfumery:product_list' %}"><i class="bi bi-arrow-left" aria-hidden="true"></i> Continue shopping</a>
+            </div>
+        </aside>
+    </div>
+    {% else %}
+    <div class="empty-state cart-empty">
+        <span class="bottle-mark" aria-hidden="true"><i class="bi bi-bag"></i></span>
+        <h2>Your bag is waiting.</h2>
+        <p>Explore the collection and add a scent that feels like you.</p>
+        <a class="hero-cta mt-3" href="{% url 'perfumery:product_list' %}">Browse fragrances <i class="bi bi-arrow-right" aria-hidden="true"></i></a>
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

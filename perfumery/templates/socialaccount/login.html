@@ -1,0 +1,23 @@
+{% extends 'socialaccount/base_entrance.html' %}
+{% block title %}Continue with {{ provider.name }} | Chizzy Perfumery{% endblock %}
+{% block social_content %}
+<p class="eyebrow">SECURE ACCOUNT SIGN-IN</p>
+<div class="provider-handoff-mark" aria-hidden="true">
+    {% if provider.id == 'google' %}<i class="bi bi-google"></i>
+    {% elif provider.id == 'facebook' %}<i class="bi bi-facebook"></i>
+    {% else %}<i class="bi bi-shield-lock"></i>{% endif %}
+</div>
+{% if process == 'connect' %}
+<h2 class="auth-title">Connect {{ provider.name }}</h2>
+<p class="auth-description">You’re about to connect your {{ provider.name }} account to Chizzy Perfumery. Continue to review and approve the connection.</p>
+{% else %}
+<h2 class="auth-title">Continue with {{ provider.name }}</h2>
+<p class="auth-description">You’ll be redirected to {{ provider.name }} to securely review and approve sign-in to Chizzy Perfumery. Your provider password is never shared with us.</p>
+{% endif %}
+<form class="provider-handoff-form" method="post">
+    {% csrf_token %}
+    {{ redirect_field }}
+    <button class="btn btn-signup w-100 auth-submit" type="submit">Continue securely <i class="bi bi-arrow-up-right ms-1" aria-hidden="true"></i></button>
+</form>
+<a class="provider-handoff-cancel" href="{% url 'perfumery:product_list' %}">Not now · Return to the shop</a>
+{% endblock %}

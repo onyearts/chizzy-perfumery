@@ -1,0 +1,79 @@
+{% extends 'perfumery/base.html' %}
+{% block title %}Settings | Chizzy Perfumery{% endblock %}
+{% block content %}
+<section class="profile-page container-xl">
+    <p class="eyebrow">MY ACCOUNT</p>
+    <div class="section-heading profile-page-heading">
+        <h1>Settings</h1>
+        <a class="collection-count profile-back-link" href="{% url 'perfumery:account_dashboard' %}">Back to My Account</a>
+    </div>
+
+    <div class="profile-settings-list">
+        <section class="profile-panel profile-picture-panel" aria-labelledby="profile-picture-heading">
+            <div class="profile-picture-current">
+                {% if profile.profile_picture %}<img src="{{ profile.profile_picture.url }}" alt="Current profile picture">
+                {% else %}<i class="bi bi-person-circle" aria-hidden="true"></i>{% endif %}
+            </div>
+            <div class="profile-picture-content">
+                <p class="profile-panel-kicker">YOUR PROFILE</p>
+                <h2 id="profile-picture-heading">Profile picture</h2>
+                <p class="profile-setting-copy">Choose a photo to personalize your account menu.</p>
+                <form class="profile-picture-form" method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <label for="{{ picture_form.profile_picture.id_for_label }}">Upload a new picture</label>
+                    {{ picture_form.profile_picture }}
+                    {% for error in picture_form.profile_picture.errors %}<small class="checkout-error">{{ error }}</small>{% endfor %}
+                    <button class="btn btn-signup profile-action" type="submit">Update Profile Picture</button>
+                </form>
+            </div>
+        </section>
+
+        <section class="profile-panel profile-setting-panel" aria-labelledby="password-heading">
+            <div>
+                <p class="profile-panel-kicker">SECURITY</p>
+                <h2 id="password-heading">Change password</h2>
+                <p class="profile-setting-copy">Update the password you use to sign in to your account.</p>
+            </div>
+            <a class="btn btn-outline-dark profile-secondary-action" href="{% url 'account_change_password' %}">Change Password</a>
+        </section>
+
+        <section class="profile-panel" aria-labelledby="connected-accounts-heading">
+            <div class="profile-panel-heading">
+                <div>
+                    <p class="profile-panel-kicker">SIGN-IN OPTIONS</p>
+                    <h2 id="connected-accounts-heading">Connected accounts</h2>
+                </div>
+                <a class="profile-text-link" href="{% url 'socialaccount_connections' %}">Manage accounts</a>
+            </div>
+            <div class="profile-provider-list">
+                <div class="profile-provider-row">
+                    <span>Google</span>
+                    {% if 'google' in connected_providers %}<span class="profile-provider-status">Connected</span>{% else %}<span class="profile-provider-status is-unconnected">Not connected</span>{% endif %}
+                </div>
+                <div class="profile-provider-row">
+                    <span>Facebook</span>
+                    {% if 'facebook' in connected_providers %}<span class="profile-provider-status">Connected</span>{% else %}<span class="profile-provider-status is-unconnected">Not connected</span>{% endif %}
+                </div>
+            </div>
+        </section>
+
+        <section class="profile-panel profile-setting-panel" aria-labelledby="email-preferences-heading">
+            <div>
+                <p class="profile-panel-kicker">COMMUNICATIONS</p>
+                <h2 id="email-preferences-heading">Email preferences</h2>
+                <p class="profile-setting-copy">Email preference controls will be available here soon.</p>
+            </div>
+            <button class="btn profile-secondary-action" type="button" disabled>Coming soon</button>
+        </section>
+
+        <section class="profile-panel profile-danger-panel" aria-labelledby="danger-zone-heading">
+            <div>
+                <p class="profile-panel-kicker">ACCOUNT ACCESS</p>
+                <h2 id="danger-zone-heading">Danger zone</h2>
+                <p class="profile-setting-copy">Sign out of your account on other devices. This control is not available yet.</p>
+            </div>
+            <button class="btn profile-danger-action" type="button" disabled>Logout from all devices</button>
+        </section>
+    </div>
+</section>
+{% endblock %}

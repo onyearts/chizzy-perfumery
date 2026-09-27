@@ -1,0 +1,25 @@
+{% extends 'account/base_entrance.html' %}
+{% load i18n allauth account socialaccount %}
+{% block title %}Log in | Chizzy Perfumery{% endblock %}
+{% block entrance_content %}
+<p class="eyebrow">WELCOME BACK</p>
+<h2 class="auth-title">Log in</h2>
+<p class="auth-description">Sign in to continue with your fragrance collection.</p>
+{% if form.non_field_errors %}<div class="auth-errors" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+<form class="auth-form" method="post" action="{% url 'account_login' %}">
+    {% csrf_token %}
+    {{ redirect_field }}
+    {{ form.as_p }}
+    <div class="auth-form-meta"><a href="{% url 'account_reset_password' %}">Forgot password?</a></div>
+    <button class="btn btn-signup w-100 auth-submit" type="submit">Log in <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i></button>
+</form>
+<div class="auth-divider"><span>or continue with</span></div>
+<div class="social-auth-buttons">
+    {% if social_auth.google %}<a class="social-auth-button" href="{% provider_login_url 'google' process='login' %}"><i class="bi bi-google" aria-hidden="true"></i> Google</a>
+    {% else %}<button class="social-auth-button is-disabled" type="button" disabled title="Google OAuth credentials are not configured"><i class="bi bi-google" aria-hidden="true"></i> Google</button>{% endif %}
+    {% if social_auth.facebook %}<a class="social-auth-button" href="{% provider_login_url 'facebook' process='login' %}"><i class="bi bi-facebook" aria-hidden="true"></i> Facebook</a>
+    {% else %}<button class="social-auth-button is-disabled" type="button" disabled title="Facebook OAuth credentials are not configured"><i class="bi bi-facebook" aria-hidden="true"></i> Facebook</button>{% endif %}
+</div>
+{% if not social_auth.google or not social_auth.facebook %}<p class="social-auth-setup-note">Social sign-in buttons become active after Google or Facebook app credentials are added to your local environment.</p>{% endif %}
+<p class="auth-switch">New to Chizzy Perfumery? <a href="{% url 'account_signup' %}">Create an account</a></p>
+{% endblock %}

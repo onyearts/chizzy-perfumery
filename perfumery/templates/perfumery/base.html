@@ -1,0 +1,209 @@
+{% load static %}
+<!doctype html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f7f5f0">
+    <title>{% block title %}Chizzy Perfumery{% endblock %}</title>
+    <script>
+        (() => {
+            const savedTheme = localStorage.getItem('perfumery-theme');
+            const preferredTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            document.documentElement.dataset.bsTheme = savedTheme || preferredTheme;
+        })();
+    </script>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'perfumery/styles.css' %}?v=20260927-8">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <header class="site-header sticky-top">
+        <nav class="navbar navbar-expand-lg container-xl py-3" aria-label="Main navigation">
+            <a class="navbar-brand wordmark" href="{% url 'perfumery:product_list' %}">
+                <span class="brand-mark" aria-hidden="true">C</span>
+                <span>Chizzy <span class="brand-subname">Perfumery</span><span class="brand-period">.</span></span>
+            </a>
+            <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavigation" aria-controls="mainNavigation" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="mainNavigation">
+                <ul class="navbar-nav gap-lg-3 py-3 py-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="{% url 'perfumery:product_list' %}">Shop all</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'perfumery:product_list' %}#collection">Fragrance</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/admin/">Seller studio</a></li>
+                </ul>
+                <form class="navbar-search position-relative" action="{% url 'perfumery:search' %}" method="get" role="search" data-suggestions-url="{% url 'perfumery:search_suggestions' %}">
+                    <label class="visually-hidden" for="siteSearch">Search fragrances and brands</label>
+                    <input class="form-control" id="siteSearch" name="q" type="search" value="{{ request.GET.q }}" placeholder="Search scents or brands" autocomplete="off" aria-autocomplete="list" aria-controls="searchSuggestions" aria-expanded="false">
+                    <button class="btn search-submit" type="submit" aria-label="Search"><i class="bi bi-search" aria-hidden="true"></i></button>
+                    <ul class="search-suggestions list-unstyled" id="searchSuggestions" role="listbox" hidden></ul>
+                </form>
+                <div class="nav-actions d-flex align-items-center gap-2">
+                    <button class="btn theme-toggle" id="themeToggle" type="button" aria-label="Switch to dark mode" title="Switch theme">
+                        <i class="bi bi-moon-stars" aria-hidden="true"></i>
+                    </button>
+                    <a class="btn cart-link" href="{% url 'perfumery:cart' %}" aria-label="Shopping bag, {{ cart_quantity }} items">
+                        <i class="bi bi-bag" aria-hidden="true"></i><span class="cart-count">{{ cart_quantity }}</span>
+                    </a>
+                    {% if user.is_authenticated %}
+                    <div class="profile-menu" id="profileMenu">
+                        <button class="profile-menu-toggle" id="profileMenuToggle" type="button" aria-expanded="false" aria-controls="profileMenuDropdown">
+                            <span class="profile-avatar" aria-hidden="true">
+                                {% if user.customer_profile.profile_picture %}<img src="{{ user.customer_profile.profile_picture.url }}" alt="">
+                                {% else %}<i class="bi bi-person-circle"></i>{% endif %}
+                            </span>
+                            <span class="profile-greeting">Hi, {{ user.first_name|default:user.username }}</span>
+                            <i class="bi bi-chevron-down profile-menu-chevron" aria-hidden="true"></i>
+                        </button>
+                        <div class="profile-dropdown" id="profileMenuDropdown" aria-hidden="true">
+                            <a class="profile-dropdown-item" href="{% url 'perfumery:account_dashboard' %}"><i class="bi bi-person" aria-hidden="true"></i><span>My Account</span></a>
+                            <a class="profile-dropdown-item" href="{% url 'perfumery:account_delivery_address' %}"><i class="bi bi-geo-alt" aria-hidden="true"></i><span>Delivery Address</span></a>
+                            <div class="profile-dropdown-divider" role="separator"></div>
+                            <a class="profile-dropdown-item" href="{% url 'perfumery:account_settings' %}"><i class="bi bi-gear" aria-hidden="true"></i><span>Settings</span></a>
+                            <form action="{% url 'account_logout' %}" method="post" class="profile-logout-form">
+                                {% csrf_token %}
+                                <button class="profile-dropdown-item profile-logout-button" type="submit"><i class="bi bi-box-arrow-right" aria-hidden="true"></i><span>Logout</span></button>
+                            </form>
+                        </div>
+                    </div>
+                    {% else %}
+                    <a class="btn btn-auth btn-login" href="{% url 'account_login' %}">Log in</a>
+                    <a class="btn btn-auth btn-signup" href="{% url 'account_signup' %}">Create account</a>
+                    {% endif %}
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        {% if messages %}
+        <div class="container-xl message-stack" aria-live="polite">
+            {% for message in messages %}<div class="alert alert-{{ message.tags|default:'info' }} alert-dismissible fade show" role="status">{{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Dismiss"></button></div>{% endfor %}
+        </div>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer mt-auto">
+        <div class="container-xl py-4 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
+            <a class="footer-brand" href="{% url 'perfumery:product_list' %}">CHIZZY PERFUMERY<span>.</span></a>
+            <span>Considered scents, chosen by you.</span>
+            <span class="footer-currency">Prices in NGN&nbsp; ₦</span>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = themeToggle.querySelector('i');
+
+        function updateThemeButton(theme) {
+            const darkMode = theme === 'dark';
+            themeIcon.className = darkMode ? 'bi bi-sun' : 'bi bi-moon-stars';
+            themeToggle.setAttribute('aria-label', `Switch to ${darkMode ? 'light' : 'dark'} mode`);
+            document.querySelector('meta[name="theme-color"]').content = darkMode ? '#171a17' : '#f7f5f0';
+        }
+
+        updateThemeButton(document.documentElement.dataset.bsTheme);
+        themeToggle.addEventListener('click', () => {
+            const nextTheme = document.documentElement.dataset.bsTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.dataset.bsTheme = nextTheme;
+            localStorage.setItem('perfumery-theme', nextTheme);
+            updateThemeButton(nextTheme);
+        });
+
+        const searchForm = document.querySelector('[data-suggestions-url]');
+        const searchInput = document.getElementById('siteSearch');
+        const suggestionList = document.getElementById('searchSuggestions');
+        let suggestionTimer;
+
+        function closeSuggestions() {
+            suggestionList.hidden = true;
+            searchInput.setAttribute('aria-expanded', 'false');
+        }
+
+        function showSuggestions(items) {
+            suggestionList.replaceChildren();
+            for (const item of items) {
+                const option = document.createElement('li');
+                const link = document.createElement('a');
+                const title = document.createElement('span');
+                const brand = document.createElement('small');
+                link.href = item.url;
+                link.setAttribute('role', 'option');
+                title.textContent = item.name;
+                brand.textContent = item.brand || 'Chizzy Perfumery';
+                link.append(title, brand);
+                option.append(link);
+                suggestionList.append(option);
+            }
+            suggestionList.hidden = items.length === 0;
+            searchInput.setAttribute('aria-expanded', String(items.length > 0));
+        }
+
+        searchInput.addEventListener('input', () => {
+            window.clearTimeout(suggestionTimer);
+            const query = searchInput.value.trim();
+            if (query.length < 2) {
+                closeSuggestions();
+                return;
+            }
+            suggestionTimer = window.setTimeout(async () => {
+                try {
+                    const endpoint = new URL(searchForm.dataset.suggestionsUrl, window.location.origin);
+                    endpoint.searchParams.set('q', query);
+                    const response = await fetch(endpoint, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                    if (!response.ok) throw new Error('Suggestions unavailable');
+                    const data = await response.json();
+                    showSuggestions(data.suggestions);
+                } catch {
+                    closeSuggestions();
+                }
+            }, 180);
+        });
+
+        searchInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') closeSuggestions();
+        });
+        document.addEventListener('click', (event) => {
+            if (!searchForm.contains(event.target)) closeSuggestions();
+        });
+
+        const profileMenu = document.getElementById('profileMenu');
+        const profileMenuToggle = document.getElementById('profileMenuToggle');
+        const profileMenuDropdown = document.getElementById('profileMenuDropdown');
+        if (profileMenu && profileMenuToggle && profileMenuDropdown) {
+            const canHoverProfileMenu = window.matchMedia('(hover: hover) and (min-width: 992px)');
+            function setProfileMenuOpen(isOpen) {
+                profileMenu.classList.toggle('is-open', isOpen);
+                profileMenuToggle.setAttribute('aria-expanded', String(isOpen));
+                profileMenuDropdown.setAttribute('aria-hidden', String(!isOpen));
+            }
+
+            profileMenuToggle.addEventListener('click', () => {
+                setProfileMenuOpen(profileMenuToggle.getAttribute('aria-expanded') !== 'true');
+            });
+            profileMenu.addEventListener('pointerenter', () => {
+                if (canHoverProfileMenu.matches) setProfileMenuOpen(true);
+            });
+            profileMenu.addEventListener('pointerleave', () => {
+                if (canHoverProfileMenu.matches) setProfileMenuOpen(false);
+            });
+            document.addEventListener('click', (event) => {
+                if (!profileMenu.contains(event.target)) setProfileMenuOpen(false);
+            });
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') {
+                    setProfileMenuOpen(false);
+                    profileMenuToggle.focus();
+                }
+            });
+        }
+    </script>
+</body>
+</html>

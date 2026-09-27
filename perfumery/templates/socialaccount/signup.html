@@ -1,0 +1,16 @@
+{% extends 'socialaccount/base_entrance.html' %}
+{% load i18n allauth %}
+{% block title %}Complete sign-up | Chizzy Perfumery{% endblock %}
+{% block content %}
+<p class="eyebrow">ONE LAST DETAIL</p>
+<h2 class="auth-title">Complete your sign-up</h2>
+<p class="auth-description">{% blocktrans with provider_name=account.get_provider.name %}You are joining Chizzy Perfumery with {{ provider_name }}. Add the account details needed to finish.{% endblocktrans %}</p>
+{% if form.non_field_errors %}<div class="auth-errors" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+<form class="auth-form" method="post" action="{% url 'socialaccount_signup' %}">
+    {% csrf_token %}
+    {{ form.as_p }}
+    {{ redirect_field }}
+    <button class="btn btn-signup w-100 auth-submit" type="submit">Complete sign-up <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i></button>
+</form>
+<p class="auth-switch">Your provider password stays with {% if account %}{{ account.get_provider.name }}{% else %}your provider{% endif %}.</p>
+{% endblock %}

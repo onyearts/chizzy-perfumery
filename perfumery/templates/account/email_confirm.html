@@ -1,0 +1,24 @@
+{% extends 'account/base_entrance.html' %}
+{% load account %}
+{% block title %}Confirm your email | Chizzy Perfumery{% endblock %}
+{% block entrance_content %}
+<p class="eyebrow">ONE QUICK CONFIRMATION</p>
+{% if confirmation %}
+    {% user_display confirmation.email_address.user as user_display %}
+    {% if can_confirm %}
+        <h2 class="auth-title">Confirm your email</h2>
+        <p class="auth-description">Confirm <strong>{{ confirmation.email_address.email }}</strong> for {{ user_display }} to activate your Chizzy Perfumery account.</p>
+        <form class="auth-form" method="post" action="{% url 'account_confirm_email' confirmation.key %}">
+            {% csrf_token %}
+            {{ redirect_field }}
+            <button class="btn btn-signup w-100 auth-submit" type="submit">Confirm email <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i></button>
+        </form>
+    {% else %}
+        <h2 class="auth-title">Email already in use</h2>
+        <p class="auth-description">This address has already been confirmed for a different account.</p>
+    {% endif %}
+{% else %}
+    <h2 class="auth-title">Link expired</h2>
+    <p class="auth-description">This confirmation link has expired or is invalid. Request a fresh confirmation link from your <a class="auth-text-link" href="{% url 'account_email' %}">email settings</a>.</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,107 @@
+{% extends 'perfumery/base.html' %}
+{% load humanize %}
+{% block title %}Checkout | Chizzy Perfumery{% endblock %}
+{% block content %}
+<section class="checkout-page container-xl" data-fee-url="{% url 'perfumery:delivery_fee' %}" data-lgas-url="{% url 'perfumery:local_governments' %}">
+    <p class="eyebrow">DELIVERY DETAILS</p>
+    <div class="section-heading checkout-heading"><h1>Checkout</h1><span class="collection-count">Almost yours</span></div>
+    <div class="row g-5 align-items-start">
+        <div class="col-lg-7">
+            <form method="post" class="checkout-form">
+                {% csrf_token %}
+                <div class="checkout-fields">
+                    {% for field in form %}
+                    <div class="checkout-field{% if field.name == 'delivery_address' or field.name == 'order_note' %} checkout-field-wide{% endif %}">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% for error in field.errors %}<small class="checkout-error">{{ error }}</small>{% endfor %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% if form.non_field_errors %}<div class="checkout-error">{{ form.non_field_errors }}</div>{% endif %}
+                <button class="btn btn-signup checkout-submit" type="submit">Continue to Payment</button>
+            </form>
+        </div>
+        <aside class="col-lg-5">
+            <div class="cart-summary checkout-summary">
+                <h2>Order summary</h2>
+                <div class="checkout-items">
+                    {% for item in items %}
+                    <div class="checkout-item">
+                        <div><strong>{{ item.product.name }}</strong><span>{{ item.quantity }} &times; &#8358;{{ item.product.price|intcomma }}</span></div>
+                        <strong>&#8358;{{ item.line_total|intcomma }}</strong>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="summary-line"><span>Subtotal</span><strong>&#8358;{{ subtotal|intcomma }}</strong></div>
+                <div class="summary-line"><span>Delivery fee</span><strong id="deliveryFeeValue" data-value="0">&#8358;0.00</strong></div>
+                <div class="summary-line"><span>Estimated delivery</span><strong id="deliveryEstimate">Select an area</strong></div>
+                <div class="summary-line summary-total"><span>Grand total</span><strong id="grandTotalValue" data-subtotal="{{ subtotal }}">&#8358;{{ grand_total|intcomma }}</strong></div>
+                <p class="summary-note">Delivery is calculated for your selected local government area.</p>
+            </div>
+        </aside>
+    </div>
+</section>
+<script>
+(() => {
+    const page = document.querySelector('.checkout-page');
+    const state = document.getElementById('id_state');
+    const lga = document.getElementById('id_lga');
+    const feeValue = document.getElementById('deliveryFeeValue');
+    const totalValue = document.getElementById('grandTotalValue');
+    const subtotal = Number(totalValue.dataset.subtotal);
+    const currency = value => `\u20A6${value.toLocaleString('en-NG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    function resetFee() {
+        feeValue.dataset.value = '0';
+        feeValue.textContent = currency(0);
+        totalValue.textContent = currency(subtotal);
+        document.getElementById('deliveryEstimate').textContent = 'Select an area';
+    }
+    state.addEventListener('change', async () => {
+        const previouslySelectedLga = lga.value;
+        lga.disabled = true;
+        lga.replaceChildren(new Option('Choose a local government', ''));
+        resetFee();
+        if (!state.value) return;
+        try {
+            const endpoint = new URL(page.dataset.lgasUrl, window.location.origin);
+            endpoint.searchParams.set('state_id', state.value);
+            const response = await fetch(endpoint, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            if (!response.ok) throw new Error('Local governments unavailable');
+            const data = await response.json();
+            for (const item of data.lgas) lga.add(new Option(item.name, item.id));
+            if (data.lgas.some(item => String(item.id) === previouslySelectedLga)) lga.value = previouslySelectedLga;
+            lga.disabled = data.lgas.length === 0;
+            if (data.lgas.length === 0) lga.replaceChildren(new Option('No delivery areas available', ''));
+            if (lga.value) lga.dispatchEvent(new Event('change'));
+        } catch {
+            lga.replaceChildren(new Option('Could not load local governments', ''));
+        }
+    });
+    lga.addEventListener('change', async () => {
+        if (!lga.value) { resetFee(); return; }
+        feeValue.textContent = '\u2026';
+        try {
+            const endpoint = new URL(page.dataset.feeUrl, window.location.origin);
+            endpoint.searchParams.set('lga_id', lga.value);
+            const response = await fetch(endpoint, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error || 'Delivery fee unavailable');
+            }
+            const data = await response.json();
+            const fee = Number(data.delivery_fee);
+            feeValue.dataset.value = String(fee);
+            feeValue.textContent = currency(fee);
+            totalValue.textContent = currency(subtotal + fee);
+            document.getElementById('deliveryEstimate').textContent = data.estimated_days;
+        } catch (error) {
+            feeValue.textContent = 'Unavailable';
+            totalValue.textContent = currency(subtotal);
+            document.getElementById('deliveryEstimate').textContent = error.message;
+        }
+    });
+    if (state.value) state.dispatchEvent(new Event('change'));
+})();
+</script>
+{% endblock %}

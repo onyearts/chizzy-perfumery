@@ -1,0 +1,46 @@
+{% extends 'perfumery/base.html' %}
+{% block title %}My Account | Chizzy Perfumery{% endblock %}
+{% block content %}
+<section class="profile-page container-xl">
+    <p class="eyebrow">MY ACCOUNT</p>
+    <div class="section-heading profile-page-heading">
+        <h1>My Account</h1>
+        <span class="collection-count">Welcome, {{ user.first_name|default:user.username }}</span>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-6">
+            <section class="profile-panel" aria-labelledby="personal-information-heading">
+                <div class="profile-panel-heading">
+                    <div>
+                        <p class="profile-panel-kicker">YOUR DETAILS</p>
+                        <h2 id="personal-information-heading">Personal information</h2>
+                    </div>
+                </div>
+                <dl class="profile-detail-list">
+                    <div><dt>Full name</dt><dd>{{ full_name }}</dd></div>
+                    <div><dt>Email</dt><dd>{{ user.email|default:'Not added yet' }}</dd></div>
+                    <div><dt>Phone number</dt><dd>{{ profile.phone_number|default:'Not added yet' }}</dd></div>
+                </dl>
+            </section>
+        </div>
+        <div class="col-lg-6">
+            <section class="profile-panel" aria-labelledby="default-address-heading">
+                <div class="profile-panel-heading">
+                    <div>
+                        <p class="profile-panel-kicker">USED AT CHECKOUT</p>
+                        <h2 id="default-address-heading">Default delivery address</h2>
+                    </div>
+                </div>
+                <dl class="profile-detail-list">
+                    <div><dt>State</dt><dd>{% if profile.state %}{{ profile.state.name }}{% else %}Not added yet{% endif %}</dd></div>
+                    <div><dt>Local Government</dt><dd>{% if profile.local_government %}{{ profile.local_government.name }}{% else %}Not added yet{% endif %}</dd></div>
+                    <div><dt>City / Area</dt><dd>{{ profile.city_area|default:'Not added yet' }}</dd></div>
+                    <div><dt>Delivery address</dt><dd>{{ profile.delivery_address|default:'Not added yet' }}</dd></div>
+                </dl>
+                <a class="btn btn-signup profile-action" href="{% url 'perfumery:account_delivery_address' %}">Edit Profile</a>
+            </section>
+        </div>
+    </div>
+</section>
+{% endblock %}

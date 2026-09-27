@@ -1,0 +1,14 @@
+{% load account %}{% autoescape off %}{% user_display user as user_display %}Hi {{ user_display }},
+
+Thanks for creating an account with Chizzy Perfumery. Please verify your email address to activate your account and continue discovering your next signature scent.
+
+{% if code %}Enter this verification code in the open Chizzy Perfumery page:
+
+{{ code }}{% else %}Verify your email address:
+
+{{ activate_url }}{% endif %}
+
+If you did not create a Chizzy Perfumery account, you can safely ignore this email.
+
+Kind regards,
+The Chizzy Perfumery Team{% endautoescape %}
